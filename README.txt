@@ -71,3 +71,5 @@ Cancellation Terms
 Contact Information
 
 Note: These fields are intentionally generalized to fit multiple potential use cases.
+
+Copyright (c) 2025 Couchtr26
