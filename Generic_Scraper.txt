@@ -1,0 +1,139 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+import json
+import os
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0'
+}    
+def extract_profile_urls_from_search(base_url, max_pages=10):
+    profile_urls = []
+    for page in range(1, max_pages + 1):
+        paged_url = f"{base_url}&page={page}"
+        print(f"[INFO] Fetching page {page}: {paged_url}")
+        response = requests.get(paged_url, headers=HEADERS)
+    
+        if response.status_code != 200:
+            print(f"[WARN] Failed to fetch page {page} (Status: {response.status_code})")
+            break
+          
+        soup = BeautifulSoup(response.text, 'html.parser')
+        links = soup.select('a[href^="/escort/"]')
+        
+        if not links:
+            print(f"[INFO] No profiles found on page {page}. Ending pagination.")
+
+        for link in links:
+            href = link.get('href')
+            full_url = 'url of choice' + href
+            if full_url not in profile_urls:
+                profile_urls.append(full_url)
+
+    print(f"[INFO] Total Profiles collected: {len(profile_urls)}")
+    return profile_urls
+
+SEARCH_URL = 'url of choice'
+PROFILE_URLS = extract_profile_urls_from_search(SEARCH_URL, max_pages=10)
+
+def extract_name(soup):
+    tag = soup.find('h1', id='profile-name')
+    return tag.get_text(strip=True) if tag else 'N/A'
+
+def extract_location(soup):
+    tag = soup.find('a', href=lambda x: x and x.startswith('location info'))
+    return tag.get_text(strip=True) if tag else 'N/A'
+
+def extract_field(soup, label):
+    sections = soup.find_all('div', class_='fw-bold')
+    for section in sections:
+        if section.get_text(strip=True) == label:
+            value_div = section.find_next_sibling('div')
+            return value_div.get_text(strip=True) if value_div else 'N/A'
+    return 'N/A'
+
+def extract_profile_data(soup, profile_url):
+    name = extract_name(soup)
+    location = extract_location(soup)
+    
+    profile_attribute1 = extract_field(soup, "profile_attribute1")
+    profile_attribute2 = extract_field(soup, "profile_attribute2")
+    profile_attribute3 = extract_field(soup, "profile_attribute3")
+    profile_attribute4 = extract_field(soup, "profile_attribute4")
+    profile_attribute5 = extract_field(soup, "profile_attribute5") 
+    profile_attribute6 = extract_field(soup, "profile_attribute6") 
+
+    rates = extract_service_rate(soup)
+    service_rate_local = rates.get("local_rate", "N/A")
+    service_rate_remote = rates.get("remote_rate", "N/A")
+    deposit_terms = extract_deposit_terms_text(soup, "Deposit")
+    cancellation_terms = extract_cancellation_terms_text(soup, "Cancellation")
+    
+    contact = extract_contact_flags(soup)
+    
+    
+    return {
+        "name": name,
+        "location": location,
+        "profile_attribute1": profile_attribute1,
+        "profile_attribute2": profile_attribute2,
+        "profile_attribute3": profile_attribute3,
+        "profile_attribute4": profile_attribute4,
+        "profile_attribute5": profile_attribute5,
+        "profile_attribute6": profile_attribute6,
+        "service_rate_local": service_rate_local,
+        "service_rate_remote": service_rate_remote,
+        "profile_url": profile_url,
+        "deposit_terms": deposit_terms,
+        "cancellation_terms": cancellation_terms,
+        "contact_info": contact["contact_info"],
+    }
+
+def extract_service_rate(soup):
+    rates = {}
+    headings = soup.find_all('h4')
+    
+    for heading in headings:
+        label = heading.get_text(strip=True).lower()
+        if label in ["local", "remote"]:
+            next_tags = heading.find_all_next('strong', limit=3)
+            if len(next_tags) >= 2 and "1 hour" in next_tags[0].get_text(strip=True).lower():
+                price = next_tags[1].get_text(strip=True).replace('US$', '').strip()
+                rates[f"{label}_rate"] = price
+
+    return rates
+
+def extract_policy_text(soup, header_text):
+    header = soup.find('h4', string=header_text)
+    if header:
+        policy = header.find_next_sibling('p', class_='user_text')
+        return policy.get_text(strip=True) if policy else 'N/A'
+    return 'N/A'
+
+def extract_contact_flags(soup):
+    phone = "Yes" if "Contact Info: Yes" in soup.get_text() else "No"
+    
+    return {
+        "contact_info": phone
+    }  
+
+all_data = []
+for url in PROFILE_URLS:
+  response = requests.get(url, headers=HEADERS)
+  soup = BeautifulSoup(response.text, 'html.parser')
+  profile_data = extract_profile_data(soup, url)
+  all_data.append(profile_data)
+
+os.makedirs('output', exist_ok=True)
+
+with open('output/scraped_profiles.csv', 'w', newline='', encoding='utf-8') as f:
+    writer = csv.DictWriter(f, fieldnames=all_data[0].keys())
+    writer.writeheader()
+    writer.writerows(all_data)
+
+with open('output/scraped_profiles.json', 'w', encoding='utf-8') as jf:
+          json.dump(all_data, jf, ensure_ascii=False, indent=2)
+
+    
+
+
