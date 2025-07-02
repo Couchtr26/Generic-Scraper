@@ -1,11 +1,10 @@
-# Generic Profile Scraper - Codex Libris Mechanicus Data Module
+# Generic_Profile_Scraper
 
 ## 🔧 Description
 
-A Python-based generic web scraper designed to extract structured profile data from paginated web directories. This tool demonstrates full scraping workflow: pagination handling, HTML parsing, data extraction, and multi-format file output (CSV & JSON).
+A Python-based, generic web scraper designed to extract structured profile data from paginated web directories. Demonstrates a full scraping workflow: pagination handling, HTML parsing, data extraction, and multi-format file output (CSV & JSON).
 
-This tool can be adapted for:
-
+**Adaptable for:**
 - Business directories
 - Vendor listings
 - Service provider profiles
@@ -16,20 +15,20 @@ This tool can be adapted for:
 
 ## 💻 Features
 
-- Handles multi-page scraping automatically
+- Automatically scrapes multi-page directories
 - Extracts profile-level data from individual pages
-- Outputs results into both CSV and JSON formats
-- Fully written in Python using requests, BeautifulSoup, csv, and json modules
-- Clean separation of data extraction logic for easy modification
+- Outputs results in both CSV and JSON formats
+- Written in Python (`requests`, `BeautifulSoup4`, `csv`, `json`)
+- Clear data extraction logic for easy customization
 
 ---
 
 ## 🛠 Technologies Used
 
 - Python 3.x
-- Requests
-- BeautifulSoup4
-- CSV / JSON (standard library)
+- requests
+- beautifulsoup4
+- csv / json (Python standard library)
 
 ---
 
@@ -37,39 +36,36 @@ This tool can be adapted for:
 
 1. Clone or download this repository.
 2. Ensure Python 3 is installed.
-3. Install BeautifulSoup4 if not already installed:
+3. Install required packages:
+    ```bash
+    pip install beautifulsoup4 requests
+    ```
+4. Run the scraper:
+    ```bash
+    python Generic_Scraper.py
+    ```
+5. Enter the starting URL of the site you wish to scrape when prompted.
 
-```bash
-pip install beautifulsoup4
-Run the scraper:
+---
 
-bash
-Copy
-Edit
-python Generic_Scraper.py
-Enter the starting URL of the site you wish to scrape when prompted.
+## 🎯 Data Extracted
 
-🎯 What This Scraper Extracts
-Profile Name
+- Profile Name
+- Location
+- Profile Attribute 1
+- Profile Attribute 2
+- Profile Attribute 3
+- Profile Attribute 4
+- Service Rate (Local & Remote)
+- Deposit Terms
+- Cancellation Terms
+- Contact Information
 
-Location
+*Note: These fields are intentionally generalized for flexibility across multiple use cases.*
 
-Profile Attribute 1
+---
 
-Profile Attribute 2
+## 📄 License
 
-Profile Attribute 3
-
-Profile Attribute 4
-
-Service Rate (Local & Remote)
-
-Deposit Terms
-
-Cancellation Terms
-
-Contact Information
-
-Note: These fields are intentionally generalized to fit multiple potential use cases.
-
-Copyright (c) 2025 Couchtr26
+Copyright (c) 2025 Couchtr26  
+MIT License
